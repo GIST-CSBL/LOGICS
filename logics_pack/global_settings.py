@@ -1,0 +1,2 @@
+
+NJOBS_MULTIPROC = 8
