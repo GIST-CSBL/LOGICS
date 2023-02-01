@@ -39,6 +39,8 @@ class PubChemProcessLOGICS(pubchem_tools.PubChemAssaysEntrezGene):
             except KeyError as err:
                 exclude.append(i)
         self.filtered = self.filtered.drop(exclude).reset_index(drop=True)
+        print("following indices of records are dropped due to undefined tokens:")
+        print(exclude)
 
 def process_chembl(guacamol_chembl_path, smtk: smiles_vocab.SmilesTokenizer):
     """ 

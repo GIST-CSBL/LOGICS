@@ -60,7 +60,7 @@ class Vocabulary(object):
             try:
                 token_indices[i] = self.vocab[token]
             except KeyError as err:
-                print("encode(): KeyError occurred! %s"%err)
+                # print("encode(): KeyError occurred! %s"%err)
                 raise
         return token_indices
 
