@@ -15,11 +15,14 @@ PROJECT_PATHS = {
     "PIK3CA_RAW_PATH": "data/pik3ca/pubchem_5290.txt",
 
     ### following files will be generated through experiments
+    ## initial data
     "CHEMBL_DATA_PATH": "data/chembl/chembl_new.smi",
     "KOR_DATA_PATH": "data/kor/kor_affinity_new.csv",
     "PIK3CA_DATA_PATH": "data/pik3ca/pik3ca_affinity_new.csv",
     "KOR_FOLD_JSON": "data/kor/kor_fold_splits.json",
-    "PIK3CA_FOLD_JSON": "data/pik3ca/pik3ca_fold_splits.json"
+    "PIK3CA_FOLD_JSON": "data/pik3ca/pik3ca_fold_splits.json",
+    "KOR_DATA_FP": "data/kor/kor_aff_npfps.npy",
+    "PIK3CA_DATA_FP": "data/pik3ca/pik3ca_aff_npfps.npy",
 }
 
 def build_project_paths(project_dir="./"):
