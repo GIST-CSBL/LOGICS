@@ -1,3 +1,4 @@
+import json
 
 class Object:
     pass
@@ -9,6 +10,7 @@ TEST_FOLD_IDX = 5
 
 PROJECT_PATHS = {
     "SMILES_TOKENS_PATH": "logics_pack/logics_tokens.txt",
+    "EXPERIMENT_SETTINGS_JSON": "logics_pack/experiment_settings.json",
     
     ### following data files are provided in GitHub repo
     "CHEMBL_RAW_PATH": "data/chembl/guacamol_v1_all.smiles",
@@ -32,6 +34,23 @@ def build_project_paths(project_dir="./"):
         project_paths[key] = project_dir + path
     project_paths["PROJECT_DIR"] = project_dir
     return project_paths
+
+class ExperimentSettings:
+    def __init__(self, expset_json_path):
+        with open(expset_json_path, 'r') as f:
+            self.expset = json.load(f)
+        self.path = expset_json_path
+    
+    def get_keys(self):
+        return self.expset.keys()
+    
+    def update_setting(self, key, item):
+        self.expset[key] = item
+        with open(self.path, 'w') as f:
+            json.dump(self.expset, f, indent=2)
+
+    def get_setting(self, key):
+        return self.expset[key]
 
 
 SMILES_TOKENS_PATH = "logics_pack/logics_tokens.txt"
