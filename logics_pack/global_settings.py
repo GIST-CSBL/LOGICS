@@ -45,7 +45,8 @@ class ExperimentSettings:
         return self.expset.keys()
     
     def update_setting(self, key, item):
-        self.expset[key] = item
+        # int will be converted to str
+        self.expset[key] = str(item)
         with open(self.path, 'w') as f:
             json.dump(self.expset, f, indent=2)
 
