@@ -11,6 +11,7 @@ TEST_FOLD_IDX = 5
 PROJECT_PATHS = {
     "SMILES_TOKENS_PATH": "logics_pack/logics_tokens.txt",
     "EXPERIMENT_SETTINGS_JSON": "logics_pack/experiment_settings.json",
+    "PRETRAIN_SETTING_JSON": "logics_pack/pretrain_setting.json",
     
     ### following data files are provided in GitHub repo
     "CHEMBL_RAW_PATH": "data/chembl/guacamol_v1_all.smiles",
