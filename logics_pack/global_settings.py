@@ -5,6 +5,7 @@ class Object:
 NJOBS_MULTIPROC = 8
 
 NUM_DATA_FOLDS = 6
+TEST_FOLD_IDX = 5
 
 PROJECT_PATHS = {
     "SMILES_TOKENS_PATH": "logics_pack/logics_tokens.txt",
@@ -29,6 +30,7 @@ def build_project_paths(project_dir="./"):
     project_paths = {}
     for key, path in PROJECT_PATHS.items():
         project_paths[key] = project_dir + path
+    project_paths["PROJECT_DIR"] = project_dir
     return project_paths
 
 
