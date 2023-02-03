@@ -8,6 +8,9 @@ NJOBS_MULTIPROC = 8
 NUM_DATA_FOLDS = 6
 TEST_FOLD_IDX = 5
 
+KOR_ACT_THRS = 7.0  # threshold for being KOR active
+PIK3CA_ACT_THRS = 8.0  # threshold for being PIK3CA active
+
 PROJECT_PATHS = {
     "SMILES_TOKENS_PATH": "logics_pack/logics_tokens.txt",
     "EXPERIMENT_SETTINGS_JSON": "logics_pack/experiment_settings.json",
