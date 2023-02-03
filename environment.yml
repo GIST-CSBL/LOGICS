@@ -1,0 +1,5 @@
+name: LOGICS-original
+channels:
+  - defaults
+dependencies:
+  - python=3.7
