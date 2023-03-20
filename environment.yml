@@ -1,10 +1,11 @@
 name: LOGICS-original
 channels:
-  - defaults
   - conda-forge
   - pytorch
+  - defaults
 dependencies:
   - python=3.7
+  - pip=22.3.1
   - rdkit
   - tensorflow=1.15
   - keras=2.3.1
