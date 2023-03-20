@@ -21,7 +21,7 @@ PROJECT_PATHS = {
     "KOR_RAW_PATH": "data/kor/data_clean_kop.csv",
     "PIK3CA_RAW_PATH": "data/pik3ca/pubchem_5290.txt",
 
-    ### following files will be generated through experiments
+    ### following files will be generated through notes in pre-training phase
     ## initial data
     "CHEMBL_DATA_PATH": "data/chembl/chembl_new.smi",
     "KOR_DATA_PATH": "data/kor/kor_affinity_new.csv",
@@ -30,8 +30,10 @@ PROJECT_PATHS = {
     "PIK3CA_FOLD_JSON": "data/pik3ca/pik3ca_fold_splits.json",
     "KOR_DATA_FP": "data/kor/kor_aff_npfps.npy",
     "PIK3CA_DATA_FP": "data/pik3ca/pik3ca_aff_npfps.npy",
+    "KOR_DATA_FCVEC": "data/kor/kor_aff_fcvec.npy",
+    "PIK3CA_DATA_FCVEC": "data/pik3ca/pik3ca_aff_fcvec.npy",
 
-    ## pre-training phase
+    ## pre-training dataset for prior
     "PRETRAINING_DATA_PATH": "data/chembl/pre-training.smi"
 }
 
