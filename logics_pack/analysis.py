@@ -92,7 +92,7 @@ def repeated_optimal_transport(distmat, repeat):
         Optimal transport is calculated with each repeat (certain generation set),
         and the result of mappings is saved as two nested lists: row_ind_nest, col_ind_nest.
         row_ind_nest[i] and col_ind_nest[i] are the OT mapping at the i-th (supply x demand) distmat.
-        totds[i] is the total optimal transport distance of the i-th ...
+        totds[i] is the total optimal transport distance of the i-th OTD repeat.
     """
     ssize, dsize = distmat.shape
     if dsize*repeat > ssize:
@@ -108,4 +108,18 @@ def repeated_optimal_transport(distmat, repeat):
         totds.append(totd)
     return row_ind_nest, col_ind_nest, totds
 
-
+def transport_distmat(ts_to_dist, simmat:np.array, num_repeats=1):
+    """
+        Given Tanimoto simmat (row:supply(gen), column:demand(data)),
+        calculate the transport matrix with specified number of transport repeats.
+        Returns matrix with size ((num_repeats*column_size) x column_size)
+    """
+    rows, cols = simmat.shape  # provided supply and demand size
+    # if available supply amount lacks compare to the demand*repeat, abort.
+    if rows > cols*num_repeats:
+        print("Supply size is smaller than (repeat x demand size) in simmat!")
+        print("Aborting...")
+        return None
+    supplies, demands = cols*num_repeats, cols
+    _simmat = simmat[:supplies,:demands]
+    return ts_to_dist(_simmat)
