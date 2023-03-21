@@ -13,7 +13,6 @@ from . import smiles_lstm, smiles_vocab
 
 # conversion of Tanimoto similarity to the distance
 tansim_to_dist = lambda ts: np.power(10, 1-ts) - 1
-tansim_to_dist2 = lambda ts: 9 * (1-ts)
 
 class SafeSampler:
     """
