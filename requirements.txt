@@ -12,4 +12,4 @@ seaborn==0.12.2
 tensorflow==1.15.0
 torch==1.11.0
 torchaudio==0.11.0
-tourchvision==0.12.0
+torchvision==0.12.0
