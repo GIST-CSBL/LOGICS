@@ -92,21 +92,21 @@ def repeated_optimal_transport(distmat, repeat):
         Optimal transport is calculated with each repeat (certain generation set),
         and the result of mappings is saved as two nested lists: row_ind_nest, col_ind_nest.
         row_ind_nest[i] and col_ind_nest[i] are the OT mapping at the i-th (supply x demand) distmat.
-        totds[i] is the total optimal transport distance of the i-th OTD repeat.
+        motds[i] is the total optimal transport distance of the i-th OTD repeat.
     """
     ssize, dsize = distmat.shape
     if dsize*repeat > ssize:
         print("supply size is smaller than (repeat x demand size)!!!")
         print(">>> Abort from optimal transport calculation")
         return None
-    row_ind_nest, col_ind_nest, totds = [], [], []
+    row_ind_nest, col_ind_nest, motds = [], [], []
     for i in range(repeat):
         sub_distmat = distmat[i*dsize:(i+1)*dsize]
         ri, ci, totd = optimal_transport(sub_distmat)
         row_ind_nest.append(ri)
         col_ind_nest.append(ci)
-        totds.append(totd)
-    return row_ind_nest, col_ind_nest, totds
+        motds.append(totd / dsize)
+    return row_ind_nest, col_ind_nest, motds
 
 def transport_distmat(ts_to_dist, simmat:np.array, num_repeats=1):
     """
