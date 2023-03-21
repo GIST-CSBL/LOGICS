@@ -11,6 +11,8 @@ TEST_FOLD_IDX = 5
 KOR_ACT_THRS = 7.0  # threshold for being KOR active
 PIK3CA_ACT_THRS = 8.0  # threshold for being PIK3CA active
 
+OT_CALC_REPEATS = 10  # repeats for optimal transport calculations (mean reported for OTD)
+
 PROJECT_PATHS = {
     "SMILES_TOKENS_PATH": "logics_pack/logics_tokens.txt",
     "EXPERIMENT_SETTINGS_JSON": "logics_pack/experiment_settings.json",
