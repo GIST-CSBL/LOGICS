@@ -15,6 +15,7 @@ class EvalConfig:
     ssize : int  # sample size
     vc_smis : list  # valid & canonical smiles generations
     npfps : np.ndarray  # numpy array format of rdkit fingerprint 
+    npfps1k : np.ndarray  # used for similarity matrix calculation
        
 def eval_standard(evcon:EvalConfig, pret_smis):
     """
@@ -27,8 +28,7 @@ def eval_standard(evcon:EvalConfig, pret_smis):
     uniqueness = len(unis) / len(evcon.vc_smis)
     novelty = len(novs) / len(unis)
     
-    # npfps = np.load(paths_npfps['logics'])[:INTDIV_SIZE]
-    rdkfps = chemistry.np2rdkfps(evcon.npfps)
+    rdkfps = chemistry.np2rdkfps(evcon.npfps1k)
     intdiv = analysis.internal_diversity(rdkfps)
     return validity, uniqueness, novelty, intdiv
 
