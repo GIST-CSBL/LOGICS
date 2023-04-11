@@ -4,10 +4,33 @@
     2. functions performing the evaluation of the generations
 """
 
+from dataclasses import dataclass
 import numpy as np
 import pandas as pd
 from scipy.spatial import distance_matrix
 from . import analysis, chemistry
+
+@dataclass
+class EvalConfig:
+    ssize : int  # sample size
+    vc_smis : list  # valid & canonical smiles generations
+    npfps : np.ndarray  # numpy array format of rdkit fingerprint 
+       
+def eval_standard(evcon:EvalConfig, pret_smis):
+    """
+    """
+    unis = list(set(evcon.vc_smis))  # unique generations
+    pret_set = set(pret_smis)
+    novs = list(set(unis).difference(pret_set))
+    
+    validity = len(evcon.vc_smis) / evcon.ssize
+    uniqueness = len(unis) / len(evcon.vc_smis)
+    novelty = len(novs) / len(unis)
+    
+    # npfps = np.load(paths_npfps['logics'])[:INTDIV_SIZE]
+    rdkfps = chemistry.np2rdkfps(evcon.npfps)
+    intdiv = analysis.internal_diversity(rdkfps)
+    return validity, uniqueness, novelty, intdiv
 
 def sample_file_processing(sample_fmt, vacan_fmt, npfps_fmt, epochs):
     """
