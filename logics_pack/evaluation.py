@@ -34,7 +34,7 @@ def eval_standard(evcon:EvalConfig, pret_smis):
     uniqueness = len(unis) / len(evcon.vc_smis)
     novelty = len(novs) / len(unis)
     
-    rdkfps = chemistry.np2rdkfps(evcon.npfps[evcon.simmat_size])
+    rdkfps = chemistry.np2rdkfps(evcon.npfps[:evcon.simmat_size])
     intdiv = analysis.internal_diversity(rdkfps)
     return validity, uniqueness, novelty, intdiv
 
@@ -45,7 +45,7 @@ def eval_optimization(evcon:EvalConfig, predictor):
     predact = np.mean(predictor.predict(evcon.npfps))
     
     gen_rdkfps = chemistry.np2rdkfps(evcon.npfps)
-    ext_simmat = analysis.calculate_simmat(gen_rdkfps[evcon.simmat_size], evcon.data_rdkfps)
+    ext_simmat = analysis.calculate_simmat(gen_rdkfps[:evcon.simmat_size], evcon.data_rdkfps)
     pwsim = np.mean(ext_simmat)
 
     fcdval = frechet_chemnet.fcd_calculation(evcon.fc_vecs, evcon.data_fc_vecs)
