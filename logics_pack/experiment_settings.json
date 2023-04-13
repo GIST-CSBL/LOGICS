@@ -1,1 +1,14 @@
-{}
+{
+  "kor-pred-best-cv": "3",
+  "pik3ca-pred-best-cv": "2",
+  "kor-logics-best-epoch": "100",
+  "kor-vgpc-best-epoch": "20",
+  "kor-segler-best-epoch": "147",
+  "kor-reinv-best-epoch": "3000",
+  "kor-drugex-best-epoch": "450",
+  "pik3ca-logics-best-epoch": "200",
+  "pik3ca-segler-best-epoch": "150",
+  "pik3ca-vgpc-best-epoch": "16",
+  "pik3ca-reinv-best-epoch": "21000",
+  "pik3ca-drugex-best-epoch": "4230"
+}
