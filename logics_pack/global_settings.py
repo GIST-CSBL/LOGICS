@@ -36,7 +36,8 @@ PROJECT_PATHS = {
     "PIK3CA_DATA_FCVEC": "data/pik3ca/pik3ca_aff_fcvec.npy",
 
     ## pre-training dataset for prior
-    "PRETRAINING_DATA_PATH": "data/chembl/pre-training.smi"
+    "PRETRAINING_DATA_PATH": "data/chembl/pre-training.smi",
+    "PRET_DATA_50K_PATH": "data/chembl/pre-training_50k.smi"
 }
 
 def build_project_paths(project_dir="./"):
