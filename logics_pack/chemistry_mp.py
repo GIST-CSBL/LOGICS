@@ -13,15 +13,6 @@ from .multiprocess_tools import multiprocess_task_on_list, multiprocess_task_man
 # import same names from tools for having the same functions
 from .chemistry import is_valid_smiles, convert_to_canon, get_morganfp_by_smi
 
-# from logics_package.analysis import tansim_to_dist, tansim_to_dist2
-# from logics_package.analysis import evaluation_basic
-# from logics_package.analysis import calculate_simmat
-# from logics_package.analysis import internal_diversity
-# from logics_package.analysis import standard_metrics
-# from logics_package.analysis import optimal_transport
-# from logics_package.analysis import repeated_optimal_transport
-# from logics_package.analysis import optimization_metrics
-
 def get_valid_canons(smilist):
     '''
         Get the valid & canonical form of the smiles.
