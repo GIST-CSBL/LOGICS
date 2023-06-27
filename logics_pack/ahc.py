@@ -78,6 +78,7 @@ def AHC_training(config):
             torch.save(ckpt_dict, config.save_ckpt_fmt%epo)
             with open(config.sample_fmt%epo, 'w') as f:
                 f.writelines([line+'\n' for line in decoded_samples])
+            print("occ_mem size: ", len(occ_mem))
 
         train_samples = ssplr.sample_clean(config.train_batch_size, maxlen=150)
         train_samples = list(set(train_samples)) # remove duplicates
