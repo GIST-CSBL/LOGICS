@@ -2,6 +2,7 @@
 This code is reimplementation of the Augmented Hill-Climb method:
     https://github.com/MorganCThomas/SMILES-RNN
 
+For diversity filter (DF), we used DF2 (occurrence) described in the paper.
 """
 
 import torch
@@ -26,6 +27,8 @@ def AHC_training(config):
             sample_fmt (.txt with epoch wildcard)
             sigma (scaler to the score)
             topk (fraction of selected learning examples, 0.5 in original) <<-- new stuff
+            tole (allowed tolerance before linear penalty) <<-- new stuff
+            buff (hard threshold; if exceed, reward is 0) <<-- new stuff
             rewarding (one of the reward conversions in reward_functions.py)
             train_batch_size
             finetune_lr
@@ -53,6 +56,11 @@ def AHC_training(config):
 
     with open(config.predictor_path, 'rb') as f:
         pred_model = pkl.load(f)
+
+    ## AHC concept - occurence diversity filter
+    occ_mem = {}  # "(canonical smiles)": (occurence)
+    tole = config.tole
+    buff = config.buff
 
     for epo in range(config.max_epoch+1):
         ssplr = analysis.SafeSampler(lstm_agent, config.sampling_bs)
@@ -88,6 +96,22 @@ def AHC_training(config):
         vc_rewards = config.rewarding(vc_preds)
         # reward = -0.5 for invalid smiles
 
+        ### DF2 occurrence based penalization
+        for i, smi in enumerate(train_vacans):
+            ## record occurrence
+            if smi not in occ_mem:
+                occ_mem[smi] = 1
+            else:
+                occ_mem[smi] += 1
+            
+            if occ_mem[smi] <= tole:
+                pass
+            elif occ_mem[smi] >= buff:
+                vc_rewards[i] = 0
+            else:  # penalty
+                vc_rewards[i] = ((buff-occ_mem[smi])/(buff-tole)) * vc_rewards[i]
+
+        ### AHC concept
         # reward assignment to each sample
         train_rewards = np.full(new_bs, -0.5)
         train_rewards[vids] = vc_rewards
@@ -127,5 +151,3 @@ def AHC_training(config):
         agent_optimizer.zero_grad()
         avgloss.backward()
         agent_optimizer.step()
-
-        
