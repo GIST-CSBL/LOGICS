@@ -27,9 +27,10 @@ def AHC_training(config):
             save_ckpt_fmt (.ckpt with epoch wildcard)
             sample_fmt (.txt with epoch wildcard)
             sigma (scaler to the score)
-            nbmax (DF scaffold bin size)
-            minscore (min score threshold considered binning to DF memory)
-            dfmode ('binary' or 'linear' for DF penalty)
+            topk (fraction of selected learning examples, 0.5 in original)  // new stuff
+            nbmax (DF scaffold bin size)  // new stuff
+            minscore (min score threshold considered binning to DF memory)  // new stuff
+            dfmode ('binary' or 'linear' for DF penalty)  // new stuff
             rewarding (one of the reward conversions in reward_functions.py)
             train_batch_size
             finetune_lr
