@@ -2,7 +2,7 @@
 This code is reimplementation of the Augmented Hill-Climb method:
     https://github.com/MorganCThomas/SMILES-RNN
 
-For diversity filter (DF), we used DF2 (occurrence) described in the paper.
+For diversity filter (DF, memory bins based on scaffold similarity), we used DF2 setting described in the paper.
 """
 
 import torch
@@ -10,6 +10,7 @@ import json
 import numpy as np
 import pickle as pkl
 from . import smiles_lstm, smiles_vocab, chemistry, analysis
+from .ScaffoldFilter import ScaffoldSimilarityECFP
 
 def AHC_training(config):
     """
@@ -26,9 +27,9 @@ def AHC_training(config):
             save_ckpt_fmt (.ckpt with epoch wildcard)
             sample_fmt (.txt with epoch wildcard)
             sigma (scaler to the score)
-            topk (fraction of selected learning examples, 0.5 in original) <<-- new stuff
-            tole (allowed tolerance before linear penalty) <<-- new stuff
-            buff (hard threshold; if exceed, reward is 0) <<-- new stuff
+            nbmax (DF scaffold bin size)
+            minscore (min score threshold considered binning to DF memory)
+            dfmode ('binary' or 'linear' for DF penalty)
             rewarding (one of the reward conversions in reward_functions.py)
             train_batch_size
             finetune_lr
@@ -57,10 +58,8 @@ def AHC_training(config):
     with open(config.predictor_path, 'rb') as f:
         pred_model = pkl.load(f)
 
-    ## AHC concept - occurence diversity filter
-    occ_mem = {}  # "(canonical smiles)": (occurence)
-    tole = config.tole
-    buff = config.buff
+    ## AHC concept - diversity filter
+    divfilter = ScaffoldSimilarityECFP(nbmax=config.nbmax, minscore=config.minscore, outputmode=config.dfmode)
 
     for epo in range(config.max_epoch+1):
         ssplr = analysis.SafeSampler(lstm_agent, config.sampling_bs)
@@ -78,7 +77,6 @@ def AHC_training(config):
             torch.save(ckpt_dict, config.save_ckpt_fmt%epo)
             with open(config.sample_fmt%epo, 'w') as f:
                 f.writelines([line+'\n' for line in decoded_samples])
-            print("occ_mem size: ", len(occ_mem))
 
         train_samples = ssplr.sample_clean(config.train_batch_size, maxlen=150)
         train_samples = list(set(train_samples)) # remove duplicates
@@ -95,27 +93,16 @@ def AHC_training(config):
         vc_preds = pred_model.predict(vc_features)
         # convert activity to reward
         vc_rewards = config.rewarding(vc_preds)
-        # reward = -0.5 for invalid smiles
 
-        ### DF2 occurrence based penalization
-        for i, smi in enumerate(train_vacans):
-            ## record occurrence
-            if smi not in occ_mem:
-                occ_mem[smi] = 1
-            else:
-                occ_mem[smi] += 1
-            
-            if occ_mem[smi] <= tole:
-                pass
-            elif occ_mem[smi] >= buff:
-                vc_rewards[i] = 0
-            else:  # penalty
-                vc_rewards[i] = ((buff-occ_mem[smi])/(buff-tole)) * vc_rewards[i]
+        ### Diversity Filter and scaffold bin update
+        scores_dict = {"total_score": np.array(vc_rewards, dtype=np.float64),
+                       "step": [epo]*len(vc_rewards)}
+        filtered_scores = divfilter.score(train_vacans, scores_dict)
 
         ### AHC concept
         # reward assignment to each sample
-        train_rewards = np.full(new_bs, -0.5)
-        train_rewards[vids] = vc_rewards
+        train_rewards = np.full(new_bs, -0.5)  # reward = -0.5 for invalid smiles
+        train_rewards[vids] = filtered_scores
 
         ### AHC concept
         sind = np.argsort(train_rewards)[::-1]  # descending
@@ -130,8 +117,11 @@ def AHC_training(config):
         
         ### debug ###
         if epo % int(config.save_period/3) == 0:
+            print("---")
             print("uniq valid count: ", len(vids))
             print("avg pkx: ", vc_preds.mean())
+            print("avg filtered scores ", filtered_scores.mean())
+            print("size _scaffolds ", len(divfilter._scaffolds))
             print("top-k reward mean: ", train_rewards.mean())
 
         # encode samples
