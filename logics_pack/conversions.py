@@ -3,6 +3,7 @@
         https://github.com/MolecularAI/reinvent-chemistry
 
     The code was slightly modified to fit in our project.
+    Download date: 2023/06/28
 """
 
 import random

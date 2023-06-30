@@ -8,7 +8,8 @@ import json
 import numpy as np
 import pickle as pkl
 from . import smiles_lstm, smiles_vocab, chemistry, analysis
-from .ScaffoldFilter import ScaffoldSimilarityECFP
+from .ScaffoldFilter import IdenticalMurckoScaffold
+from . import inception, conversions
 
 def AugmentedMemory_training(config):
     """
@@ -25,21 +26,19 @@ def AugmentedMemory_training(config):
             save_ckpt_fmt (.ckpt with epoch wildcard)
             sample_fmt (.txt with epoch wildcard)
             sigma (scaler to the score)
-
-
-
-            
-            topk (fraction of selected learning examples, 0.5 in original)  // new stuff
+            memory_size  // new stuff
+            aug_rounds  // new stuff
             nbmax (DF scaffold bin size)  // new stuff
             minscore (min score threshold considered binning to DF memory)  // new stuff
             dfmode ('binary' or 'linear' for DF penalty)  // new stuff
             rewarding (one of the reward conversions in reward_functions.py)
-            train_batch_size
+            train_batch_size  - just sampling batch size
             finetune_lr
             sampling_bs
     """
     device_name = config.device_name
     featurizer = config.featurizer
+    converter = conversions.Conversions()  # will use smiles randomizer
 
     vocab = smiles_vocab.Vocabulary()
     vocab.init_from_file(config.tokens_path)
@@ -61,8 +60,15 @@ def AugmentedMemory_training(config):
     with open(config.predictor_path, 'rb') as f:
         pred_model = pkl.load(f)
 
-    ## AHC concept - diversity filter
-    divfilter = ScaffoldSimilarityECFP(nbmax=config.nbmax, minscore=config.minscore, outputmode=config.dfmode)
+    ## AugMem concept - diversity filter
+    divfilter = IdenticalMurckoScaffold(nbmax=config.nbmax, minscore=config.minscore, outputmode=config.dfmode)
+    ## AugMem concept - experience replay memory (Inception) initialization
+    # initialize empty memory
+    inc_conf = inception.InceptionConfiguration([], memory_size=config.memory_size, sample_size=-1, 
+                                            augmented_memory_mode_collapse_guard=True)
+    empty_scf = inception.ScoringFunc({})
+    priorwp = inception.PriorWrapper(lstm_prior, vocab, smtk)
+    incept = inception.Inception(inc_conf, empty_scf, priorwp)
 
     for epo in range(config.max_epoch+1):
         ssplr = analysis.SafeSampler(lstm_agent, config.sampling_bs)
@@ -101,23 +107,23 @@ def AugmentedMemory_training(config):
         scores_dict = {"total_score": np.array(vc_rewards, dtype=np.float64),
                        "step": [epo]*len(vc_rewards)}
         filtered_scores = divfilter.score(train_vacans, scores_dict)
+        # generated scaffold with full bin will get 0 score
 
-        ### AHC concept
+        ### Aug Mem concept
+        # we will try adding only the valid smiles
+        smi_to_score = {smi: sc for smi, sc in zip(train_vacans, filtered_scores)}
+        sc_func = inception.ScoringFunc(smi_to_score)
+        # update replay buffer
+        incept.evaluate_and_add(train_vacans, sc_func, priorwp)  # memory purge is called inside
+
         # reward assignment to each sample
         train_rewards = np.full(new_bs, -0.5)  # reward = -0.5 for invalid smiles
         train_rewards[vids] = filtered_scores
-
-        ### AHC concept
-        sind = np.argsort(train_rewards)[::-1]  # descending
-        # only use top-k for update
-        usz = int(np.ceil(len(sind)*config.topk))
-        uind = sind[:usz]  # use these indices
-        train_samples = np.array(train_samples)[uind]
-        train_rewards = train_rewards[uind]
-
+        
+        # update for epoch (main step)
         # advantage
         advantages = config.sigma * train_rewards
-        
+
         ### debug ###
         if epo % int(config.save_period/3) == 0:
             print("---")
@@ -129,7 +135,6 @@ def AugmentedMemory_training(config):
 
         # encode samples
         enc_samples, _ = smiles_lstm.prepare_batch(train_samples, smtk, vocab)
-
         # calculate log likelihood of prior and agent
         prior_nlls, _ = lstm_prior.likelihood(enc_samples)
         agent_nlls, _ = lstm_agent.likelihood(enc_samples)
@@ -145,3 +150,29 @@ def AugmentedMemory_training(config):
         agent_optimizer.zero_grad()
         avgloss.backward()
         agent_optimizer.step()
+
+        # inner loop - aug mem learning
+        for j in range(config.aug_round):
+            # randomize the current valid samples
+            sample_rand_smis = [converter.randomize_smiles(smi) for smi in train_vacans]
+            advantages1 = config.sigma * filtered_scores
+
+            sample_enc, _ = smiles_lstm.prepare_batch(sample_rand_smis, smtk, vocab)
+            prior_nlls1, _ = lstm_prior.likelihood(sample_enc)
+            agent_nlls1, _ = lstm_agent.likelihood(sample_enc)
+            prior_loglikes1, agent_loglikes1 = -prior_nlls1, -agent_nlls1
+            augme_loglikes1 = prior_loglikes1 + torch.Tensor(advantages1).to(device_name)
+            inner_loss1 = torch.pow((augme_loglikes1 - agent_loglikes1), 2).mean()
+
+            buffer_rand_smis, buffer_scores, buffer_prior_nlls = incept.augmented_memory_replay(priorwp)
+            advantages2 = config.sigma * buffer_scores
+            buffer_enc, _ = smiles_lstm.prepare_batch(buffer_rand_smis, smtk, vocab)
+            buffer_agent_nlls, _ = lstm_agent.likelihood(buffer_enc)
+            prior_loglikes2, agent_loglikes2 = -buffer_prior_nlls, -buffer_agent_nlls
+            augme_loglikes2 = prior_loglikes2 + torch.Tensor(advantages2).to(device_name)
+            inner_loss2 = torch.pow((augme_loglikes2 - agent_loglikes2), 2).mean()
+
+            aug_mem_loss = inner_loss1 + inner_loss2
+            agent_optimizer.zero_grad()
+            aug_mem_loss.backward()
+            agent_optimizer.step()

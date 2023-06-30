@@ -1,6 +1,8 @@
 """
     This code is directly from:
         https://github.com/schwallergroup/augmented_memory
+
+    Download date: 2023/06/28
 """
 
 from dataclasses import dataclass

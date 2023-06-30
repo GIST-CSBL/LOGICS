@@ -3,6 +3,7 @@
         https://github.com/schwallergroup/augmented_memory
 
     The code was slightly modified to fit in our project.
+    Download date: 2023/06/28
 """
 
 # -------------------------------------------------------------------------------------------------------------
@@ -21,6 +22,7 @@ from . import smiles_lstm, smiles_vocab
 
 class PriorWrapper:
     ### Note: "likelihood" stored in memory is actually the prior's NLL.
+    ### likelihood_smiles() returns the log likelihood.
     def __init__(self, prior_generator: smiles_lstm.SmilesLSTMGenerator, vocab: smiles_vocab.Vocabulary, 
                  smtk: smiles_vocab.SmilesTokenizer):
         self.prior_generator = prior_generator
@@ -30,7 +32,7 @@ class PriorWrapper:
     def likelihood_smiles(self, smiles: List[str]):
         enc_samples, _ = smiles_lstm.prepare_batch(smiles, self.smtk, self.vocab)
         prior_nlls, _ = self.prior_generator.likelihood(enc_samples)
-        return prior_nlls  # dim: (batch_size), type: Tensor
+        return -prior_nlls  # dim: (batch_size), type: Tensor
 
 class ScoringFunc:
     def __init__(self, smi_to_score: dict):
@@ -84,9 +86,9 @@ class Inception:
     def evaluate_and_add(self, smiles, scoring_function, prior):
         if len(smiles) > 0:
             score = scoring_function.get_final_score(smiles)
-            likelihood = prior.likelihood_smiles(smiles)
+            likelihood = prior.likelihood_smiles(smiles)  ## log likelihood
             ### df = pd.DataFrame({"smiles": smiles, "score": score.total_score, "likelihood": -likelihood.detach().cpu().numpy()})
-            df = pd.DataFrame({"smiles": smiles, "score": score, "likelihood": -likelihood.detach().cpu().numpy()})
+            df = pd.DataFrame({"smiles": smiles, "score": score, "likelihood": -likelihood.detach().cpu().numpy()})  ## store neg log like
             self.memory = self.memory.append(df)
             self._purge_memory()
 
