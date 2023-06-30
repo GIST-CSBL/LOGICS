@@ -152,7 +152,7 @@ def AugmentedMemory_training(config):
         agent_optimizer.step()
 
         # inner loop - aug mem learning
-        for j in range(config.aug_round):
+        for j in range(config.aug_rounds):
             # randomize the current valid samples
             sample_rand_smis = [converter.randomize_smiles(smi) for smi in train_vacans]
             advantages1 = config.sigma * filtered_scores
