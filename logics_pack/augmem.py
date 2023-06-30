@@ -168,7 +168,7 @@ def AugmentedMemory_training(config):
             advantages2 = config.sigma * buffer_scores
             buffer_enc, _ = smiles_lstm.prepare_batch(buffer_rand_smis, smtk, vocab)
             buffer_agent_nlls, _ = lstm_agent.likelihood(buffer_enc)
-            prior_loglikes2, agent_loglikes2 = -buffer_prior_nlls, -buffer_agent_nlls
+            prior_loglikes2, agent_loglikes2 = -buffer_prior_nlls.to(device_name), -buffer_agent_nlls
             augme_loglikes2 = prior_loglikes2 + torch.Tensor(advantages2).to(device_name)
             inner_loss2 = torch.pow((augme_loglikes2 - agent_loglikes2), 2).mean()
 
