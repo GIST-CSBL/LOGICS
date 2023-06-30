@@ -131,7 +131,7 @@ def AugmentedMemory_training(config):
             print("avg pkx: ", vc_preds.mean())
             print("avg filtered scores ", filtered_scores.mean())
             print("size _scaffolds ", len(divfilter._scaffolds))
-            print("top-k reward mean: ", train_rewards.mean())
+            print("mem score avg: ", incept.memory['score'].mean())
 
         # encode samples
         enc_samples, _ = smiles_lstm.prepare_batch(train_samples, smtk, vocab)
