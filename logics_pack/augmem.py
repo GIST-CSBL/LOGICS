@@ -114,7 +114,9 @@ def AugmentedMemory_training(config):
         smi_to_score = {smi: sc for smi, sc in zip(train_vacans, filtered_scores)}
         sc_func = inception.ScoringFunc(smi_to_score)
         # update replay buffer
-        incept.evaluate_and_add(train_vacans, sc_func, priorwp)  # memory purge is called inside
+        incept.evaluate_and_add(train_vacans, sc_func, priorwp)  # cutoff at the defined memory size
+        # Selective Memory Purge -- purge ones having same scaffolds as 0 scoring smiles
+        incept.selective_memory_purge(train_vacans, filtered_scores)
 
         # reward assignment to each sample
         train_rewards = np.full(new_bs, -0.5)  # reward = -0.5 for invalid smiles
