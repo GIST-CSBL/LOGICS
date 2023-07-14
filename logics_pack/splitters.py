@@ -1,4 +1,4 @@
-'''
+"""
     These codes are modification of some of DeepChem package's modules:
         https://github.com/deepchem/deepchem
     
@@ -12,7 +12,7 @@
         year={2019}
     }
 }
-'''
+"""
 
 import csv
 import numpy as np
