@@ -1,17 +1,8 @@
 """
-    These codes are modification of some of DeepChem package's modules:
+    These codes are modification of some of DeepChem package modules:
         https://github.com/deepchem/deepchem
     
-    We used this code for scaffold split for the datasets.
-        
-    @book{Ramsundar-et-al-2019,
-        title={Deep Learning for the Life Sciences},
-        author={Bharath Ramsundar and Peter Eastman and Patrick Walters and Vijay Pande and Karl Leswing and Zhenqin Wu},
-        publisher={O'Reilly Media},
-        note={\url{https://www.amazon.com/Deep-Learning-Life-Sciences-Microscopy/dp/1492039837}},
-        year={2019}
-    }
-}
+    We used this code for scaffold split of the datasets.
 """
 
 import csv
