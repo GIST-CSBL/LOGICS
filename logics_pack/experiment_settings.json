@@ -10,5 +10,9 @@
   "pik3ca-segler-best-epoch": "150",
   "pik3ca-vgpc-best-epoch": "16",
   "pik3ca-reinv-best-epoch": "21000",
-  "pik3ca-drugex-best-epoch": "4230"
+  "pik3ca-drugex-best-epoch": "4230",
+  "kor-ahc-best-epoch": "680",
+  "pik3ca-ahc-best-epoch": "1660",
+  "kor-augmem-best-epoch": "400",
+  "pik3ca-augmem-best-epoch": "980"
 }
