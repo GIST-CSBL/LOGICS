@@ -97,3 +97,11 @@ def fold_splits(data_size, folds):
         fold_dict[i] = fold_members
     fold_dict[folds-1] = ids[(folds-1)*fold_size:]
     return fold_dict
+
+def kx_to_pkx(kx):
+    # only use when the concentration unit is uM (micro molar)
+    return -np.log10(kx*(10**-6)) # pKx
+
+def pkx_to_kx(pkx):
+    # only use when the concentration unit is uM (micro molar)
+    return np.power(10, 6-pkx) # kx (uM)
